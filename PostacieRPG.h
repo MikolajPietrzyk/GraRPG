@@ -162,7 +162,6 @@ void createCharacter(Character *character, int iloscPuktowDoRozdysponowania){
 				break;
 		}
 	}
-	cout << "Stworzyles postac " << endl << endl;
 }
 	
 };
