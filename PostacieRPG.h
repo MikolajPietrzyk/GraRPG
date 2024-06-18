@@ -14,9 +14,10 @@ public:
 	int speed;
 	int agility;
     int healthPoint;
+    int luck;
 	
-Character(string defalutName = "Noname", int defalutStrength = 1, int defaultSpeed = 1, int defaultAgility = 1, int defaultHealthPoint = 100)
-	:name(defalutName), strength(defalutStrength), speed(defaultSpeed), agility(defaultAgility), healthPoint(defaultHealthPoint) {}
+Character(string defalutName = "Noname", int defalutStrength = 1, int defaultSpeed = 1, int defaultAgility = 1, int defaultHealthPoint = 100, int defaultluck = 1)
+	:name(defalutName), strength(defalutStrength), speed(defaultSpeed), agility(defaultAgility), healthPoint(defaultHealthPoint), luck(defaultluck) {}
 	
 		
 string getName(){
@@ -59,42 +60,90 @@ void setHealthPoint(int hp){
 	healthPoint = hp;
 }
 
+int getLuck(){
+	return luck;
+}
 
-void wypisanieUmiejetnosci(){
+void setLuck(int sz){
+	luck = sz;
+}
+
+
+virtual void wypisanieUmiejetnosci(){
 	cout << "Nazwa: " << getName() << endl;
 	cout << "Sila: " << getStrength() << endl;
 	cout << "Predkosc: " << getSpeed() << endl;
 	cout << "Zwinnosc: " << getAgility() << endl;
-    cout << "Punkty zycia " << getHealthPoint() << endl << endl;
+    cout << "Punkty zycia: " << getHealthPoint() << endl;
+    cout << "Szczescie: " << getLuck() << endl << endl;
 }
 
 };
 
 class Postac : public Character{
 private:
+	int doswiadczenie = 0;
+	int poziom = 1;
 
 public:
 
-Postac(string name = "Noname", int strength = 1, int speed = 1, int agility = 1, int healthPoint = 100)
-	:Character(name, strength, speed, agility, healthPoint){}
+Postac(string name = "Noname", int strength = 1, int speed = 1, int agility = 1, int healthPoint = 100, int luck = 1, int doswiadczenie = 0, int poziom = 1)
+	:Character(name, strength, speed, agility, healthPoint, luck){}
 	
+int getDoswiadczenie(){
+	return doswiadczenie;
+}
+
+void setDoswiadczenie(int d){
+	doswiadczenie = d;
+}
+
+int getPoziom(){
+	return poziom;
+}
+
+void setPoziom(int p){
+	poziom = p;
+}
+
+virtual void wypisanieUmiejetnosci() override{
+	cout << endl;
+	cout << "Nazwa: " << getName() << endl;
+	cout << "Sila: " << getStrength() << endl;
+	cout << "Predkosc: " << getSpeed() << endl;
+	cout << "Zwinnosc: " << getAgility() << endl;
+    cout << "Punkty zycia: " << getHealthPoint() << endl;
+    cout << "Szczescie: " << getLuck() << endl;
+	cout << "Poziom: " << getPoziom() << endl;
+    cout << "Doswiadczenie: " << getDoswiadczenie() << endl << endl;
+    
+}
+
 };
 
 class Enemy : public Character{
 private:
-	vector<string> imionaPrzeciwnikow = {"Wikolak" , "Goblin" , "Wampir"};
+	vector<string> imionaPrzeciwnikow = {"Wikolak" , "Goblin" , "Wampir" , "Wiwerna", "Ogr", "Bob", "Kosciotrup", "Leszy"};
 public:
 
-Enemy(string name = "Enemy", int strength = 1, int speed = 1, int agility = 1, int healthPoint = 100)
-	:Character(name, strength, speed, agility, healthPoint){}
+Enemy(string name = "Enemy", int strength = 1, int speed = 1, int agility = 1, int healthPoint = 100, int luck = 1)
+	:Character(name, strength, speed, agility, healthPoint, luck){}
 	
-void generateEnemy(){
+void generateEnemy(Postac *postac){
 	srand (time(NULL));
 	setName(imionaPrzeciwnikow[rand()%imionaPrzeciwnikow.size()]);
-	setStrength(rand()%40+10);
-	setSpeed(rand()%40+10);
-	setAgility(rand()%40+10);
-    setHealthPoint(rand()%100+50);
+	setStrength(rand()%40 + 10 * postac->getPoziom());
+	setSpeed(rand()%40 + 10 * postac->getPoziom());
+	setAgility(rand()%40 + 10 * postac->getPoziom());
+    setHealthPoint(rand()%100 + 50 + 10 * postac->getPoziom());
+	if(getName() == "Bob"){
+		cout << "Zbliza sie cos bardzo niebezpiecznego. Lepiej uciekaj!!!" << endl;
+		setLuck(10);
+		setStrength(getStrength() + 20);
+		setSpeed(getSpeed() + 20);
+		setAgility(getAgility() + 20);
+ 	   	setHealthPoint(getHealthPoint() + 50);
+	}
 }
 
 };
@@ -112,7 +161,11 @@ void createCharacter(Character *character, int iloscPuktowDoRozdysponowania){
 	cout << "Podaj nazwe:";
 	cin >> nowaNazwa;
 	character -> setName(nowaNazwa);
-	cout << endl;
+	dodawaniePunktow(character, iloscPuktowDoRozdysponowania);
+	cout << "Stworzyles postac " << endl << endl;
+}
+
+void dodawaniePunktow(Character *character, int iloscPuktowDoRozdysponowania){
 	while(iloscPuktowDoRozdysponowania > 0){
 		cout << endl;
 		cout << "Masz do rozdysponowania " << iloscPuktowDoRozdysponowania << " punktow." << endl;
@@ -162,18 +215,49 @@ void createCharacter(Character *character, int iloscPuktowDoRozdysponowania){
 				break;
 		}
 	}
+}	
+};
+
+
+class Levelowanie{
+private:
+	int wynikStatystyk;
+	TworzeniePostaci ulepszenieStatystyk;
+	int hp = 100;
+	
+public:
+void zdobyteDoswiadczenie(Postac *postac, Character *przeciwnik){
+	wynikStatystyk = (przeciwnik->getStrength() + przeciwnik->getSpeed() + przeciwnik -> getAgility());
+	postac->setDoswiadczenie(postac->getDoswiadczenie() + wynikStatystyk);
+	cout << "Po ciezkiej walce zdobyles nowe doswiadczenie: " << postac->getDoswiadczenie() << endl;
+}
+
+void nowyLevel(Postac *postac){
+	cout << "Wstepujesz do swiatyni szukajac ukojenia." << endl;
+	if(postac->getDoswiadczenie() > 100*postac->getPoziom()){
+		postac->setDoswiadczenie(postac->getDoswiadczenie() - 100*postac->getPoziom());
+		postac->setPoziom(postac->getPoziom()+1);
+		cout << "Czujesz przyplyw mocy i nowej sily." << endl;
+		postac->setHealthPoint(hp);
+		cout << "Gdzie sie najbardziej rozwinales? " << endl;
+		ulepszenieStatystyk.dodawaniePunktow(postac, 10);
+	}else{
+		cout << "Po chwili spedzonej w swiatyni odzyskujesz spokoj umyslu." << endl;
+	}
+	cout << endl <<  "Z nowa sila wychodzisz z swiatyni, z nadzieja na przezycie nowych przygod" << endl << endl;
 }
 	
 };
 
-
-class Walka
-{
+class Walka{
 private:
     bool ktoSzybszy = 0;
     int szczescieAtakujacego = 1;
     int szczescieBroniacego = 1;
     bool szybszy = 0;
+    
+    Levelowanie levelowanie;
+    
 public:
 void walka(Postac *postac, Enemy *przeciwnik){
     srand (time(NULL));
@@ -194,6 +278,7 @@ void walka(Postac *postac, Enemy *przeciwnik){
     cout << endl << "Koniec walki!!!" << endl;
     if(sprawdzenieKtoWygral(postac) == 1){
         cout << "Walke wygral: " << postac->getName() << " i zostalo mu " << postac->getHealthPoint() << " hp." << endl;
+        levelowanie.zdobyteDoswiadczenie(postac, przeciwnik);
     }else{
         cout << "Walke wygral: " << przeciwnik->getName() << " i zostalo mu " << przeciwnik->getHealthPoint() << " hp." << endl;
     }
@@ -211,8 +296,8 @@ void cios(Character *atakujacy, Character *broniacy){
 
 bool sprawdzenieKtoSzybszy(Character *atakujacy, Character *broniacy){
     szybszy = 0;
-    szczescieAtakujacego = rand()%5; // ustawianie szans na zmienienie szybkosci
-    szczescieBroniacego = rand()%5;
+    szczescieAtakujacego = rand()%4+atakujacy->getLuck(); // ustawianie szans na zmienienie szybkosci
+    szczescieBroniacego = rand()%4+broniacy->getLuck();
     if((atakujacy->getSpeed()*szczescieAtakujacego) > (broniacy->getSpeed()*szczescieBroniacego)){ 
         szybszy = 1;
     }else{
