@@ -10,8 +10,8 @@ int main(int argc, char** argv) {
 // dodac odzyskiwanie zycia
 // dodac walute
 // dodac zapisywanie
-// dodac wybor postaci juz stworzonej
-// sala slaw
+// sala slaw 
+// dodac do postaci ilosc wygranych walk
 
 	Postac postac;
 	//Postac postac2("Sanji", 24, 56, 34);
@@ -19,6 +19,11 @@ int main(int argc, char** argv) {
 	Enemy przeciwnik;
     Walka walka;
 	Levelowanie levelowanie;
+	
+	BazaDanych bazaDanych;
+	
+	//bazaDanych.tworzeniePliku();
+	bazaDanych.odczytywanieDanych();
     
     bool dalszaGra = 0;
     int akcja;
@@ -27,17 +32,26 @@ int main(int argc, char** argv) {
     cout << "Witaj w grze RPG!!!" << endl << endl;
 	cout << "1. Nowa gra." << endl;
 	cout << "2. Wczytanie zapisu." << endl;
+	cout << "3. Usuniecie postaci" << endl;
 	cout << "Wybor: ";
 	cin >> akcja;
 	while (dalszaGra == 0){
 		switch (akcja){		
 		case 1:
-			tworzenie.createCharacter(&postac, 100);
-			dalszaGra == 1;
+			tworzenie.createCharacter(&postac, 100, bazaDanych.getListaPostaci());
+			bazaDanych.zapisPostaciDoListy(&postac);
+			dalszaGra = 1;
 			break;
 
 		case 2:
-			dalszaGra == 1;
+			bazaDanych.wypisaniePostaci();
+			postac = bazaDanych.wyborPostaci();
+			dalszaGra = 1;
+			break;
+			
+		case 3:
+			bazaDanych.wypisaniePostaci();
+			bazaDanych.usuwanieUzytkownika();
 			break;
 
 		default:
@@ -50,8 +64,8 @@ int main(int argc, char** argv) {
 		cout << "1. Wypisanie statystyk." << endl;
 		cout << "2. Walka." << endl;
 		cout << "3. Pojscie do swiatyni." << endl;
-		cout << "4. Pojscie do sklepu." << endl;
-		cout << "5. Pojscie do karczmy." << endl;
+		cout << "4. Pojscie do sklepu. zamkniete" << endl;
+		cout << "5. Pojscie do karczmy. zamkniete" << endl;
 		cout << "6. Koniec. Zapis stanu gry" << endl;
 		cin >> akcja;
 		cout << endl;
@@ -80,6 +94,7 @@ int main(int argc, char** argv) {
 				break;
 
 			case 6:
+				bazaDanych.zapisDanych(postac);
 				dalszaGra = 0;
 				break;
 
